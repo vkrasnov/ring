@@ -41,6 +41,15 @@ macro_rules! define_endian {
                 Self(self.0.clone())
             }
         }
+
+        impl<T> core::ops::BitXorAssign for $endian<T>
+        where
+            T: core::ops::BitXorAssign,
+        {
+            fn bitxor_assign(&mut self, a: Self) {
+                self.0 ^= a.0;
+            }
+        }
     };
 }
 

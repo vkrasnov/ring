@@ -14,12 +14,9 @@
 
 #include <GFp/aes.h>
 
-#if !defined(__wasm__)
-#include <string.h>
-#else
+// XXX
 void *memcpy(void *, const void*, size_t);
 void *memset(void *, int, size_t);
-#endif
 
 #include "../../internal.h"
 

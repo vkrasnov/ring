@@ -607,6 +607,8 @@ fn cc(
         let _ = c.flag(flag);
     }
     if &target.env == "musl" {
+        // TODO: Only if using clang.
+        let _ = c.flag("-nostdlibinc");
         // Some platforms enable _FORTIFY_SOURCE by default, but musl
         // libc doesn't support it yet. See
         // http://wiki.musl-libc.org/wiki/Future_Ideas#Fortify

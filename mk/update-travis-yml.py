@@ -164,7 +164,7 @@ def format_entry(os, target, compiler, rust, mode, features):
         return [prefix + x for x in xs]
 
     if sys == "linux":
-        packages = sorted(get_linux_packages_to_install(target, compiler, arch, kcov))
+        packages = sorted(get_linux_packages_to_install(target, compiler, arch, abi, kcov))
         template += """
       dist: %s""" % linux_dist
 
@@ -195,7 +195,7 @@ def format_entry(os, target, compiler, rust, mode, features):
             "os" : os,
             }
 
-def get_linux_packages_to_install(target, compiler, arch, kcov):
+def get_linux_packages_to_install(target, compiler, arch, abi, kcov):
     if compiler.startswith("clang-") or compiler.startswith("gcc-"):
         packages = [compiler]
     else:
@@ -219,13 +219,11 @@ def get_linux_packages_to_install(target, compiler, arch, kcov):
         packages += ["binfmt-support",
                      "qemu-user-binfmt"]
 
-    if arch == "i686":
+    if arch == "i686" and abi == "gnu":
         if compiler.startswith("clang") or compiler == "":
-            packages += ["libc6-dev-i386",
-                         "gcc-multilib"]
+            packages += ["gcc-multilib", "libc6-dev-i386"]
         elif compiler.startswith("gcc-"):
-            packages += [compiler + "-multilib",
-                         "linux-libc-dev:i386"]
+            packages += [compiler + "-multilib", "linux-libc-dev:i386"]
         else:
             raise ValueError("unexpected compiler: %s" % compiler)
 

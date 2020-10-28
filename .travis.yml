@@ -201,21 +201,11 @@ matrix:
       rust: stable
       os: linux
       dist: focal
-      addons:
-        apt:
-          packages:
-            - gcc-multilib
-            - libc6-dev-i386
 
     - env: TARGET_X=i686-unknown-linux-musl CC_X=clang FEATURES_X= MODE_X=RELWITHDEBINFO KCOV=0 RUST_X=stable
       rust: stable
       os: linux
       dist: focal
-      addons:
-        apt:
-          packages:
-            - gcc-multilib
-            - libc6-dev-i386
 
     - env: TARGET_X=arm-unknown-linux-gnueabihf CC_X=arm-linux-gnueabihf-gcc FEATURES_X= MODE_X=DEBUG KCOV=0 RUST_X=stable
       rust: stable
@@ -433,21 +423,11 @@ matrix:
       rust: nightly
       os: linux
       dist: focal
-      addons:
-        apt:
-          packages:
-            - gcc-multilib
-            - libc6-dev-i386
 
     - env: TARGET_X=i686-unknown-linux-musl CC_X=clang FEATURES_X= MODE_X=RELWITHDEBINFO KCOV=0 RUST_X=nightly
       rust: nightly
       os: linux
       dist: focal
-      addons:
-        apt:
-          packages:
-            - gcc-multilib
-            - libc6-dev-i386
 
     - env: TARGET_X=arm-unknown-linux-gnueabihf CC_X=arm-linux-gnueabihf-gcc FEATURES_X= MODE_X=DEBUG KCOV=0 RUST_X=nightly
       rust: nightly
@@ -663,21 +643,11 @@ matrix:
       rust: beta
       os: linux
       dist: focal
-      addons:
-        apt:
-          packages:
-            - gcc-multilib
-            - libc6-dev-i386
 
     - env: TARGET_X=i686-unknown-linux-musl CC_X=clang FEATURES_X= MODE_X=RELWITHDEBINFO KCOV=0 RUST_X=beta
       rust: beta
       os: linux
       dist: focal
-      addons:
-        apt:
-          packages:
-            - gcc-multilib
-            - libc6-dev-i386
 
     - env: TARGET_X=arm-unknown-linux-gnueabihf CC_X=arm-linux-gnueabihf-gcc FEATURES_X= MODE_X=DEBUG KCOV=0 RUST_X=beta
       rust: beta

@@ -22,16 +22,11 @@
 //
 // When reviewing uses of |debug_assert_nonsecret|, verify that the check
 // really does not have potential to leak a secret.
-#if !defined(__wasm__)
-# include <assert.h>
-# define debug_assert_nonsecret(x) assert(x)
-#else
 # if !defined(NDEBUG)
 #  define debug_assert_nonsecret(x) ((x) ? ((void)0) : __builtin_trap())
 # else
 #  define debug_assert_nonsecret(x) ((void)0)
 # endif
-#endif
 
 // |dev_assert_secret| is like |assert| and should be used (only) when the
 // assertion operates on secret data in a way that has the potential to leak

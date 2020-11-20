@@ -96,6 +96,51 @@ fn aead_chacha20_poly1305() {
     );
 }
 
+#[cfg(any(
+    target_arch = "aarch64",
+    target_arch = "arm",
+    target_arch = "x86_64",
+    target_arch = "x86"
+))]
+#[test]
+fn aead_chacha20_poly1305_self_test() {
+    use ring::rand::SecureRandom;
+    let mut pt_buf = [0u8; 8192];
+    let mut key_buf = [0u8; 32];
+    let mut nonce = [0u8; 12];
+    let rand = ring::rand::SystemRandom::new();
+
+    for len in 0..pt_buf.len() {
+        rand.fill(&mut pt_buf[..len]).unwrap();
+        rand.fill(&mut key_buf[..]).unwrap();
+        rand.fill(&mut nonce[..]).unwrap();
+
+        let mut ct_buf = Vec::from(&pt_buf[..len]);
+
+        let mut seal_key: aead::SealingKey<OneNonceSequence> = make_key(
+            &aead::CHACHA20_POLY1305,
+            &key_buf,
+            aead::Nonce::assume_unique_for_key(nonce.clone()),
+        );
+
+        let mut open_key: aead::OpeningKey<OneNonceSequence> = make_key(
+            &aead::CHACHA20_POLY1305,
+            &key_buf,
+            aead::Nonce::assume_unique_for_key(nonce.clone()),
+        );
+
+        seal_key
+            .seal_in_place_append_tag(aead::Aad::from(&pt_buf[..len]), &mut ct_buf)
+            .unwrap();
+
+        let pt = open_key
+            .open_in_place(aead::Aad::from(&pt_buf[..len]), &mut ct_buf[..len + 16])
+            .unwrap();
+
+        assert_eq!(pt, &pt_buf[..len], "{}", len);
+    }
+}
+
 fn test_aead<Seal, Open>(
     aead_alg: &'static aead::Algorithm,
     seal: Seal,
@@ -208,15 +253,15 @@ fn test_aead<Seal, Open>(
         ];
 
         let mut more_comprehensive_in_prefix_lengths = [0; 4096];
-        let in_prefix_lengths = if cfg!(debug_assertions) {
-            &MINIMAL_IN_PREFIX_LENS[..]
+        let in_prefix_lengths;
+        if cfg!(debug_assertions) {
+            in_prefix_lengths = &MINIMAL_IN_PREFIX_LENS[..];
         } else {
-            #[allow(clippy::needless_range_loop)]
             for b in 0..more_comprehensive_in_prefix_lengths.len() {
                 more_comprehensive_in_prefix_lengths[b] = b;
             }
-            &more_comprehensive_in_prefix_lengths[..]
-        };
+            in_prefix_lengths = &more_comprehensive_in_prefix_lengths[..];
+        }
         let mut o_in_out = vec![123u8; 4096];
 
         for in_prefix_len in in_prefix_lengths.iter() {
@@ -300,7 +345,6 @@ fn open_with_less_safe_key<'a>(
     key.open_within(nonce, aad, in_out, ciphertext_and_tag)
 }
 
-#[allow(clippy::range_plus_one)]
 fn test_aead_key_sizes(aead_alg: &'static aead::Algorithm) {
     let key_len = aead_alg.key_len();
     let key_data = vec![0u8; key_len * 2];
@@ -328,7 +372,6 @@ fn test_aead_key_sizes(aead_alg: &'static aead::Algorithm) {
 }
 
 // Test that we reject non-standard nonce sizes.
-#[allow(clippy::range_plus_one)]
 #[test]
 fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
     let nonce_len = aead::NONCE_LEN;
@@ -352,7 +395,6 @@ fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
     target_arch = "x86_64",
     target_arch = "x86"
 ))]
-#[allow(clippy::range_plus_one)]
 #[test]
 fn aead_chacha20_poly1305_openssh() {
     // TODO: test_aead_key_sizes(...);
@@ -383,7 +425,7 @@ fn aead_chacha20_poly1305_openssh() {
             let mut tag = [0u8; aead::chacha20_poly1305_openssh::TAG_LEN];
             let mut s_in_out = plaintext.clone();
             let s_key = aead::chacha20_poly1305_openssh::SealingKey::new(&key_bytes);
-            s_key.seal_in_place(sequence_num, &mut s_in_out[..], &mut tag);
+            let () = s_key.seal_in_place(sequence_num, &mut s_in_out[..], &mut tag);
             assert_eq!(&ct, &s_in_out);
             assert_eq!(&expected_tag, &tag);
             let o_key = aead::chacha20_poly1305_openssh::OpeningKey::new(&key_bytes);
